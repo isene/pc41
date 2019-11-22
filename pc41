@@ -1,66 +1,58 @@
 #!/usr/bin/ruby
+# encoding: utf-8
 
 def help
 puts <<HELPTEXT
 
+"pc41 - the HP-41 <-> Linux connection"
+
 Program created by Geir Isene (g@isene.com http://isene.com) to facilitate
-connection between an HP-41 and a PC running  Linux/Unix/Mac OSX.
+connection between an HP-41 and a PC running  Linux/Unix/Mac OSX. It is used
+with hardware connections such as the HP-41CL serial interface, the USB41
+module and/or the PIL-box.
 
-With this program and the USB41 module, you can use your PC as a printer
-for the HP-41. USB41 module by Diego Diaz: http://www.clonix.org 
+With this program and the USB41 module, you can use your PC as a printer for
+the HP-41. USB41 module by Diego Diaz: http://www.clonix.org 
 
-With this program and the serial interface to the HP-41CL replacement
-board, you can transfer data/modules between a PC and an HP-41. HP-41CL by
-Monte Dalrymple: http://www.systemyde.com
+With this program and the serial interface to the HP-41CL replacement board,
+you can transfer data/modules between a PC and an HP-41. HP-41CL by Monte
+Dalrymple: http://www.systemyde.com
 
-  SYNOPSIS: 
+Starting with the output from "pc41 -h":
 
-  pc41 [DEVICE] [OPTION]
+Usage: pc41 [options]  (no option = print to STDOUT from the USB41 module)
+    -d, --dev DEVICE   Specify the device connected to the HP-41 (default=/dev/ttyUSB0)
+    -r, --read FILE    Read from the HP-41CL serial interface and save as FILE
+    -w, --write FILE   Write FILE to the HP-41CL serial interface
+    -h                 Display SHORT help text
+        --help         Display LONG help text
 
-  DEVICE:
+Make sure the program is "runable" (with "chmod a+x") and drop it in your "bin"
+folder of choice and you are ready to go.
 
-  d=devicename
-    Specifies the device name for the connection from the PC.
+With the options "-r" and "-w", the program must be run as root to get access
+to the serial/usb port. The program defaults to input from /dev/ttyUSB0, but
+you may specify another input device by simply adding it as an argument to the
+program:
 
-  OPTIONS:
+    pc41 -d /dev/ttyUSB1
 
-  -h
-    Displays the helpfile
+To use the program to transfer data/modules using the HP-41, you need to
+provide one of two options:
 
-  r=filename
-    Read data from the HP-41 and save to "filename" (9600 baud)
+    pc41 -r FILE
+    pc41 -w FILE
 
-  w=filename
-    Writes "filename" from the PC to the HP-41 (4800 baud)
-  
+With the option "-r FILE", you read data from the HP-41 and save to FILE.
 
-Make sure the program is "runable" (with "chmod a+x") and drop it in your
-"bin" folder of choice and you are ready to go.
+With the option "-w FILE", you write data from FILE to the HP-41.
 
-The program must be run as root to get access to the serial/usb port.
+Default usage is with the USB41 module. Without the "-r", "-w" or "-d" options,
+the program expects input from an HP-41 with the USB41 module and acts as a
+printer.
 
-The program defaults to input from /dev/ttyUSB0, but you may specify
-another input device by simply adding it as an argument to the program:
-
-    pc41 d=/dev/ttyUSB1
-
-Default usage is with the USB41 module. To use the program to transfer
-data/modules using the HP-41, you need to provide one of two options:
-
-    pc41 r=filename
-    pc41 w=filename
-
-With the option "r=filename", you READ data FROM the HP-41 and save it in
-the file specified by "filename".
-
-With the option "w=filename", you WRITE data from the file specified by
-"filename" TO the HP-41.
-
-Without the "r=" or "w=" options, the program expects input from an HP-41
-with the USB41 module and acts as a printer.
-
-Any printing from your HP-41 will go to Standard Out. To print whatever
-comes from the HP-41 straight onto the screen, simply run the program:
+Any printing from your HP-41 will go to Standard Out. To print whatever comes
+from the HP-41 straight onto the screen, simply run the program:
 
     pc41
 
@@ -71,30 +63,34 @@ To print a program on the HP-41 to the file "myprogram.txt" on the PC, do:
 
     pc41 > myprogram.txt
 
-Except for ending the program with a "Control-C" on the PC, you may also print
-the message "PREND", and the program will terminate (just enter "PREND" into
-Alpha and do XEQ"PRA")
+Instead of ending the program with a "Control-C" on the PC, you should
+print the message "PREND" to flush out the remaining characters in the
+print buffer and it will then terminate the program (just enter "PREND"
+into Alpha and do XEQ"PRA").
 
-You must have Ruby installed as well as "ruby-serialport" (on Ubuntu or Debian,
-do "sudo apt-get install ruby-serialport"). Alternatively you may install
-ruby-serialport from RubyGems:
+You must have Ruby installed. To use the "-r" and "-w" options, you must have
+"ruby-serialport" installed (on Ubuntu or Debian, do "sudo apt-get install
+ruby-serialport"). Alternatively you may install ruby-serialport from RubyGems:
 
     sudo gem install ruby-serialport
 
-The script will work just the same.
+For Mac OS/X users, the usual device would be "/dev/tty.usbserial ". 
 
-For Mac OS/X users, the usual device would be "/dev/tty.usbserial ". To
-write the file "~/coolstuff.txt" from a Mac OSX computer to the HP-41CL
+To write the file "~/coolstuff.txt" from a Mac OSX computer to the HP-41CL
 using the serial connector:
 
-    pc41 d=/dev/tty.usbserial w=~/coolstuff.txt        
+    pc41 -d /dev/tty.usbserial -w ~/coolstuff.txt        
 
-Version: 0.3 (2012-06-13)
+Please amend the script if you want or ask me for new features.
+
+Version: 0.6 (2015-12-22)
 License: Public domain
 
 HELPTEXT
 end
 
+
+# Load modules
 begin
     require 'rubygems'
 rescue
@@ -103,112 +99,155 @@ end
 begin
     require "serialport"
 rescue
-    puts "you need to install ruby-serialport"
+    puts "You need to install ruby-serialport (gem install ruby-serialport)"
     exit
 end
 
+require 'optparse'
+
+
 # Parameters for the serial port
-port_str = "/dev/ttyUSB0"
-if ARGV.length > 0 and ARGV[0] =~ /di\=/
-    port_str = ARGV[0].split "="
-    port_str = port_str[1]
-    ARGV.delete_at(0)
-end
+$port_str = "/dev/ttyUSB0"
 data_bits = 8
 stop_bits = 1
 parity = SerialPort::NONE
 
-# Set the mode depending on the user input
-mode = "help"    if ARGV[0] == "-h"
-mode = "usb41"   if ARGV.length == 0
-mode = "readcl"  if ARGV[0] =~ /r=/
-mode = "writecl" if ARGV[0] =~ /w=/
 
-case mode
-    when "help" # Display help file
+# Handle the command line options
+options = {}
+
+optparse = OptionParser.new do |opts|
+    # Set a banner, displayed at the top of the help screen.
+    opts.banner = "Usage: pc41 [options] (no option = print to STDOUT from the USB41 module)"
+
+    # Define the options, and what they do
+    opts.on('-d', '--dev DEVICE', 'Specify the device connected to the HP-41 (default=/dev/ttyUSB0)') do |dev|
+	$port_str = dev
+    end
+
+    options[:read] = nil
+    opts.on('-r', '--read FILE', 'Read from the HP-41CL serial interface and save as FILE') do |file|
+	options[:read] = file
+    end
+
+    options[:write] = nil
+    opts.on('-w', '--write FILE', 'Write FILE to the HP-41CL serial interface') do |file|
+	options[:write] = file
+    end
+
+    opts.on('-h', 'Display SHORT help text') do
+	puts opts
+	exit
+    end
+
+    opts.on('--help', 'Display LONG help text') do
 	help
 	exit
-    when "usb41"# Run script with the USB41 module (act as printer for the HP-41)
-	baud_rate = 115200
-	sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-	chrarray = ["♦", "¤", "ж", "←", "α", "β", "Γ", "↓", "Δ", "σ", 
-	    "♦", "λ", "μ", "д", "τ", "Φ", "Θ", "Ω", "δ", "Å", 
-	    "å", "Ä", "ä", "Ö", "ö", "Ü", "ü", "Æ", "æ", "≠", 
-	    "£", "▒", " ", "!", "\"", "\#", "$", "%", "&", "'", 
-	    "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", 
-	    "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", 
-	    "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", 
-	    "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", 
-	    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", 
-	    "Z", "[", "\\", "]", "↑", "_", "`", "a", "b", "c", 
-	    "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-	    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", 
-	    "x", "y", "z", "π", "|", "→", "Σ", "├"]
-	inchr = 0
-	outstr = ""
-	loop do
-	    inchr = sp.getc
-	    outstr += chrarray[ inchr ] if inchr < 128
-	    outstr +=" " * ( inchr -160 ) if inchr > 160 and inchr < 184
-	    if inchr == 232
+    end
+end
+
+optparse.parse!
+
+
+# Act on the options with the sequence below as precedence 
+
+# Read data FROM the HP-41CL and save to file
+if options[:read] 
+    baud_rate = 9600
+    sp = SerialPort.new($port_str, baud_rate, data_bits, stop_bits, parity)
+    filename = options[:read]
+    sp.read_timeout = 5000
+    sp.flow_control = SerialPort::HARD # Important for handshake, etc.
+    puts "Enter the address in Alpha on your HP-41CL (e.g. 80C000-0FFF for a 4K block at address 80C)."
+    puts "XEQ\"SERINI\" and XEQ\"BAUD96\" on the 41CL."
+    puts "Press the Enter key on the PC and then XEQ\"YEXP\" on the 41CL within 5 seconds."
+    STDIN.getc # Wait for user to press Enter
+    puts "Commencing transfer from the HP-41CL after XEQ\"YEXP\" on the 41CL..."
+    outdata = sp.read # The actual transfer FROM the HP-41CL
+    if outdata == ""
+	puts "No transfer"
+	exit
+    end
+    filenametmp = filename + ".tmp"
+    File.open(filenametmp, 'w') { |f| f.write(outdata) }
+    # Perform byte swapping Big Endian/Little Endian by using "dd"
+    %x[dd if=#{filenametmp} of=#{filename} conv=swab > /dev/null 2>&1]
+    File.delete(filenametmp)
+    puts "Transfer completed to to file named \"#{filename}\""
+    sp.close
+    puts "Connection closed."
+    exit
+end
+
+# Read data from a file and send TO the HP-41CL
+if options[:write] 
+    baud_rate = 4800
+    sp = SerialPort.new($port_str, baud_rate, data_bits, stop_bits, parity)
+    filename = options[:write]
+    filenametmp = filename + ".tmp"
+    # Perform byte swapping Big Endian/Little Endian by using "dd"
+    %x[dd if=#{filename} of=#{filenametmp} conv=swab > /dev/null 2>&1]
+    indata = File.open(filenametmp, 'r') { |f| f.read }
+    File.delete(filenametmp)
+    sp.flow_control = SerialPort::HARD # Important for handshake, etc.
+    puts "Enter the address in Alpha on your HP-41CL (e.g. 80C000-0FFF)."
+    puts "XEQ\"SERINI\" and XEQ\"BAUD48\" on the 41CL"
+    puts "XEQ\"YIMP\" on the 41CL and press the Enter key on the PC within one second."
+    STDIN.getc # Wait for user to press Enter
+    puts "Transferring to the HP-41CL..."
+    sp.write indata # The actual transfer TO the HP-41 CL
+    puts "Transferring the file named \"#{filename}\" to the HP-41CL"
+    puts "You should soon see the HP-41CL return to normal display."
+    sp.close
+    puts "Connection closed."
+    exit
+end
+
+
+# Act as a printer for the HP-41 with the USB41 module inserted
+baud_rate = 115200
+sp = SerialPort.new($port_str, baud_rate, data_bits, stop_bits, parity)
+chrarray = ["♦", "¤", "ж", "←", "α", "β", "Γ", "↓", "Δ", "σ", 
+    "♦", "λ", "μ", "д", "τ", "Φ", "Θ", "Ω", "δ", "Å", 
+    "å", "Ä", "ä", "Ö", "ö", "Ü", "ü", "Æ", "æ", "≠", 
+    "£", "▒", " ", "!", "\"", "\#", "$", "%", "&", "'", 
+    "(", ")", "*", "+", ",", "-", ".", "/", "0", "1", 
+    "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", 
+    "<", "=", ">", "?", "@", "A", "B", "C", "D", "E", 
+    "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", 
+    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", 
+    "Z", "[", "\\", "]", "↑", "_", "`", "a", "b", "c", 
+    "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", 
+    "x", "y", "z", "π", "|", "→", "Σ", "├"]
+inchr = 0
+outstr = " "
+
+#loop do
+#    inchr = sp.getc.unpack('C')[0]
+#    puts inchr
+#end
+
+loop do
+  inchr = sp.getc.unpack('C')[0]
+  outstr += chrarray[inchr] if inchr < 128
+  outstr +=" " * (inchr -160) if inchr > 160 and inchr < 184
+  if inchr == 232
 		outstr = " " * (24 - outstr.length) + outstr
 		puts outstr
 		outstr = ""
-	    end
-	    if inchr == 224 and outstr != ""
+  end
+  if inchr == 224 and outstr != ""
 		puts outstr
 		outstr = ""
-	    end
-	    if inchr.to_i == 240
+  end
+  if inchr == 240
 		puts outstr
 		break
-	    end
-	    break if outstr == "PREND"
-	end
-	sp.close
-    when "readcl" # Read data FROM the HP-41CL and save to file
-	baud_rate = 9600
-	sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-	file = ARGV[0].split "="
-	filename = file[1]
-	sp.read_timeout = 5000
-	sp.flow_control = SerialPort::HARD # Important for handshake, etc.
-	puts "Enter the address in Alpha on your HP-41CL (e.g. 80C000-0FFF)."
-	puts "XEQ\"BAUD96\" on the 41CL."
-	puts "Press the Enter key on the PC."
-	puts "XEQ\"YEXP\" on the 41CL within 5 seconds."
-	STDIN.getc # Wait for user to press Enter
-	puts "Commencing transfer from the HP-41CL after XEQ\"YEXP\" on the 41CL..."
-	outdata = sp.read # The actual transfer FROM the HP-41CL
-	if outdata == ""
-	    puts "No transfer"
-	    exit
-	end
-	filenametmp = filename + ".tmp"
-	File.open(filenametmp, 'w') { |f| f.write(outdata) }
-	# Perform byte swapping Big Endian/Little Endian by using "dd"
-	%x[dd if=#{filenametmp} of=#{filename} conv=swab > /dev/null 2>&1]
-	File.delete( filenametmp )
-	puts "Transfer completed to to file named \"#{filename}\""
-    when "writecl" # Read data from a file and send TO the HP-41CL
-	baud_rate = 4800
-	sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-	file = ARGV[0].split "="
-	filename = file[1]
-	filenametmp = filename + ".tmp"
-	# Perform byte swapping Big Endian/Little Endian by using "dd"
-	%x[dd if=#{filename} of=#{filenametmp} conv=swab > /dev/null 2>&1]
-	indata = File.open(filenametmp, 'r') { |f| f.read }
-	File.delete( filenametmp )
-	sp.flow_control = SerialPort::HARD # Important for handshake, etc.
-	puts "Enter the address in Alpha on your HP-41CL (e.g. 80C000-0FFF)."
-	puts "XEQ\"BAUD48\" on the 41CL"
-	puts "XEQ\"YIMP\" on the 41CL and press the Enter key on the PC within one second."
-	STDIN.getc # Wait for user to press Enter
-	puts "Transferring to the HP-41CL..."
-	sp.write indata # The actual transfer TO the HP-41 CL
-	puts "Transferred the file named \"#{filename}\" to the HP-41CL"
-	puts "You should now see \"0\" in the display on the HP-41CL"
+  end
+  break if outstr == "PREND"
 end
 
 sp.close
+puts "Connection closed."
+exit
