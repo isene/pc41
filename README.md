@@ -7,6 +7,7 @@
 [![Stay Amazing](https://img.shields.io/badge/Stay-Amazing-blue.svg)](https://isene.org)
 
 <img src="img/pc41_logo.svg" align="left" width="150" height="150" alt="PC41 Logo">
+<br clear="left"/>
 
 Facilitating serial/USB connection to an HP-41. With this program you can
 use your PC as a printer for an HP-41 (with Diego Diaz' USB41 module) or
