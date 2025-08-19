@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="0" y="0" width="150" height="150" fill="#0f172a"/>
+  
+  <!-- PC Monitor -->
+  <g transform="translate(75, 50)">
+    <!-- Monitor screen -->
+    <rect x="-35" y="-25" width="70" height="50" rx="3" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+    
+    <!-- Terminal window -->
+    <rect x="-30" y="-20" width="60" height="40" fill="#000000"/>
+    
+    <!-- Terminal prompt -->
+    <g font-family="monospace" font-size="5" fill="#00ff00">
+      <text x="-28" y="-12">$ pc41</text>
+      <text x="-28" y="-6">PC41 Emulator v2.0</text>
+      <text x="-28" y="0">Loading ROM...</text>
+      <text x="-28" y="6">HP-41CX Ready</text>
+      <text x="-28" y="12">> _
+        <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+      </text>
+    </g>
+    
+    <!-- Monitor stand -->
+    <rect x="-5" y="25" width="10" height="10" fill="#475569"/>
+    <rect x="-10" y="35" width="20" height="3" fill="#475569"/>
+  </g>
+  
+  <!-- HP-41 Calculator -->
+  <g transform="translate(75, 100)">
+    <!-- Calculator body -->
+    <rect x="-25" y="-15" width="50" height="35" rx="4" fill="#2c2c2c" stroke="#444" stroke-width="1.5"/>
+    
+    <!-- LCD Display -->
+    <rect x="-20" y="-10" width="40" height="8" rx="1" fill="#0a4d0a" stroke="#333" stroke-width="0.5"/>
+    <text x="0" y="-4" font-family="monospace" font-size="5" fill="#00ff00" text-anchor="middle">EMULATOR MODE</text>
+    
+    <!-- Keyboard grid -->
+    <g fill="#1a1a1a" stroke="#666" stroke-width="0.3">
+      <rect x="-18" y="0" width="7" height="4" rx="0.5"/>
+      <rect x="-9" y="0" width="7" height="4" rx="0.5"/>
+      <rect x="0" y="0" width="7" height="4" rx="0.5"/>
+      <rect x="9" y="0" width="7" height="4" rx="0.5"/>
+      
+      <rect x="-18" y="5" width="7" height="4" rx="0.5"/>
+      <rect x="-9" y="5" width="7" height="4" rx="0.5"/>
+      <rect x="0" y="5" width="7" height="4" rx="0.5"/>
+      <rect x="9" y="5" width="7" height="4" rx="0.5"/>
+      
+      <rect x="-18" y="10" width="7" height="4" rx="0.5"/>
+      <rect x="-9" y="10" width="7" height="4" rx="0.5"/>
+      <rect x="0" y="10" width="7" height="4" rx="0.5"/>
+      <rect x="9" y="10" width="7" height="4" rx="0.5"/>
+    </g>
+  </g>
+  
+  <!-- Connection lines -->
+  <g stroke="#3b82f6" stroke-width="1.5" fill="none" opacity="0.7">
+    <path d="M 75,75 L 75,85">
+      <animate attributeName="stroke-dasharray" values="0,10;10,0" dur="1s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 60,75 Q 60,80 65,85">
+      <animate attributeName="stroke-dasharray" values="0,10;10,0" dur="1s" begin="0.3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 90,75 Q 90,80 85,85">
+      <animate attributeName="stroke-dasharray" values="0,10;10,0" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Features -->
+  <g transform="translate(20, 40)" opacity="0.7">
+    <text x="0" y="0" font-family="monospace" font-size="4" fill="#60a5fa">Features:</text>
+    <text x="0" y="6" font-family="monospace" font-size="3.5" fill="#94a3b8">• Full HP-41CX</text>
+    <text x="0" y="11" font-family="monospace" font-size="3.5" fill="#94a3b8">• ROM support</text>
+    <text x="0" y="16" font-family="monospace" font-size="3.5" fill="#94a3b8">• Printer out</text>
+    <text x="0" y="21" font-family="monospace" font-size="3.5" fill="#94a3b8">• Card reader</text>
+  </g>
+  
+  <!-- DOS prompt indicator -->
+  <g transform="translate(110, 40)" opacity="0.6">
+    <rect x="0" y="0" width="25" height="15" fill="#1e293b" stroke="#475569" stroke-width="1" rx="1"/>
+    <text x="12.5" y="7" font-family="monospace" font-size="4" fill="#00ff00" text-anchor="middle">DOS</text>
+    <text x="12.5" y="12" font-family="monospace" font-size="3" fill="#00ff00" text-anchor="middle">v6.22</text>
+  </g>
+  
+  <!-- Text -->
+  <text x="75" y="135" font-family="monospace" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">PC41</text>
+  <text x="75" y="145" font-family="monospace" font-size="7" fill="#94a3b8" text-anchor="middle">HP-41 DOS Emulator</text>
+</svg>

@@ -1,3 +1,5 @@
+<img src="img/pc41_logo.svg" align="left" width="150" height="150" alt="PC41 Logo">
+
 # pc41
 
 [![HP-41](https://img.shields.io/badge/HP--41-Calculator-orange)](https://en.wikipedia.org/wiki/HP-41C)
